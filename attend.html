@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#4a1fa8"/>
+<title>Attendance Mark Karein</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f1117 0%, #1a1a2e 50%, #16213e 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    color: #e0e0e0;
+  }
+
+  .card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 32px 24px;
+    width: 100%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    text-align: center;
+  }
+
+  .logo { font-size: 2.8rem; margin-bottom: 8px; }
+
+  .title {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 28px;
+  }
+
+  /* ── STEP SCREENS ── */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* ── INPUT ── */
+  .input-label {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 10px;
+    text-align: left;
+  }
+
+  .otp-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 22px;
+  }
+
+  .otp-box {
+    width: 58px;
+    height: 62px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.07);
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 800;
+    text-align: center;
+    outline: none;
+    transition: border 0.2s;
+    -webkit-appearance: none;
+    caret-color: #38d9a9;
+  }
+
+  .otp-box:focus {
+    border-color: #38d9a9;
+    background: rgba(56,217,169,0.08);
+  }
+
+  /* ── BUTTONS ── */
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 6px;
+  }
+
+  .btn:active { transform: scale(0.97); opacity: 0.85; }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #667eea, #4a1fa8);
+    color: #fff;
+  }
+
+  .btn-green {
+    background: linear-gradient(135deg, #38d9a9, #11998e);
+    color: #0f1117;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #ff6b6b, #c0392b);
+    color: #fff;
+  }
+
+  .btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* ── STUDENT NAME CARD ── */
+  .student-card {
+    background: rgba(56,217,169,0.1);
+    border: 1.5px solid rgba(56,217,169,0.3);
+    border-radius: 16px;
+    padding: 18px;
+    margin: 18px 0;
+    text-align: center;
+  }
+
+  .student-name {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #38d9a9;
+    margin-bottom: 4px;
+  }
+
+  .student-rn {
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ── LOCATION STATUS ── */
+  .loc-box {
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin: 16px 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: left;
+  }
+
+  .loc-box.waiting {
+    background: rgba(255,193,7,0.1);
+    border: 1px solid rgba(255,193,7,0.3);
+    color: #ffc107;
+  }
+
+  .loc-box.success {
+    background: rgba(56,217,169,0.1);
+    border: 1px solid rgba(56,217,169,0.3);
+    color: #38d9a9;
+  }
+
+  .loc-box.error {
+    background: rgba(255,107,107,0.1);
+    border: 1px solid rgba(255,107,107,0.3);
+    color: #ff6b6b;
+  }
+
+  .loc-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+  /* ── SUCCESS SCREEN ── */
+  .success-icon { font-size: 4rem; margin-bottom: 12px; }
+
+  .success-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #38d9a9;
+    margin-bottom: 8px;
+  }
+
+  .success-msg {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.5);
+    line-height: 1.5;
+  }
+
+  /* ── ERROR / EXPIRED ── */
+  .error-icon { font-size: 3.5rem; margin-bottom: 12px; }
+
+  .error-title {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #ff6b6b;
+    margin-bottom: 8px;
+  }
+
+  .error-msg {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.45);
+    line-height: 1.6;
+  }
+
+  /* ── TIMER ── */
+  .session-timer {
+    font-size: 0.78rem;
+    color: rgba(255,255,255,0.35);
+    margin-top: 20px;
+  }
+
+  .timer-val { color: #ffc107; font-weight: 700; }
+
+  /* ── SPINNER ── */
+  .spinner {
+    display: inline-block;
+    width: 22px; height: 22px;
+    border: 3px solid rgba(255,255,255,0.15);
+    border-top-color: #38d9a9;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #222;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 9999;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    margin: 20px 0;
+  }
+
+  .info-text {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.3);
+    margin-top: 14px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">📋</div>
+  <div class="title">Student Attendance</div>
+  <div class="subtitle" id="sessionInfo">Session load ho raha hai...</div>
+
+  <!-- ══ SCREEN 1: Loading ══ -->
+  <div class="screen active" id="screenLoading">
+    <div style="padding: 30px 0;">
+      <span class="spinner"></span>
+      <span style="color:rgba(255,255,255,0.5); font-size:0.9rem;">Session check ho raha hai...</span>
+    </div>
+  </div>
+
+  <!-- ══ SCREEN 2: Mobile Input ══ -->
+  <div class="screen" id="screenMobile">
+    <div class="input-label">📱 Apne mobile number ke <b style="color:#38d9a9;">aakhiri 4 digit</b> daalo:</div>
+    <div class="otp-row">
+      <input class="otp-box" id="d1" type="tel" inputmode="numeric" maxlength="1" pattern="[0-9]"/>
+      <input class="otp-box" id="d2" type="tel" inputmode="numeric" maxlength="1" pattern="[0-9]"/>
+      <input class="otp-box" id="d3" type="tel" inputmode="numeric" maxlength="1" pattern="[0-9]"/>
+      <input class="otp-box" id="d4" type="tel" inputmode="numeric" maxlength="1" pattern="[0-9]"/>
+    </div>
+    <button class="btn btn-primary" id="btnVerify" onclick="verifyMobile()" disabled>🔍 Verify Karo</button>
+    <div class="info-text">⚠️ Sirf wahi number daalo jo teacher ke paas registered hai</div>
+  </div>
+
+  <!-- ══ SCREEN 3: Confirm + Location ══ -->
+  <div class="screen" id="screenConfirm">
+    <div class="input-label" style="text-align:center; margin-bottom:4px;">Kya yeh aap hain?</div>
+    <div class="student-card">
+      <div class="student-name" id="foundName">—</div>
+      <div class="student-rn" id="foundRn">—</div>
+    </div>
+
+    <hr class="divider"/>
+
+    <div class="input-label">📍 Location access <b style="color:#ff6b6b;">mandatory</b> hai:</div>
+
+    <div class="loc-box waiting" id="locBox">
+      <span class="loc-icon">📡</span>
+      <div id="locMsg">Location button dabao aur Allow karo</div>
+    </div>
+
+    <button class="btn btn-primary" id="btnGetLoc" onclick="getLocation()">📍 Location Allow Karo</button>
+    <button class="btn btn-green" id="btnSubmit" onclick="submitAttendance()" disabled style="margin-top:12px;">✅ Attendance Mark Karo</button>
+    <button class="btn" onclick="goBack()" style="background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.5);margin-top:10px;font-size:0.85rem;">← Wapas Jao</button>
+
+    <div class="session-timer" id="timerDisplay"></div>
+  </div>
+
+  <!-- ══ SCREEN 4: Success ══ -->
+  <div class="screen" id="screenSuccess">
+    <div class="success-icon">✅</div>
+    <div class="success-title">Attendance Mark Ho Gayi!</div>
+    <div class="student-card" style="margin: 16px 0;">
+      <div class="student-name" id="successName">—</div>
+      <div class="student-rn" id="successDetail">—</div>
+    </div>
+    <div class="success-msg">
+      Aapki attendance teacher ke register mein<br/>
+      <b style="color:#38d9a9;">Present (P)</b> ho gayi hai। ✨
+    </div>
+    <div class="info-text" style="margin-top:18px;">Ab yeh page band kar sakte hain।</div>
+  </div>
+
+  <!-- ══ SCREEN 5: Already Marked ══ -->
+  <div class="screen" id="screenAlready">
+    <div class="success-icon">🎯</div>
+    <div class="success-title" style="color:#ffc107;">Pehle Se Mark Hai!</div>
+    <div class="success-msg">
+      Aapki attendance <b style="color:#ffc107;">pehle se hi mark</b> ho chuki hai।<br/>
+      Dobara mark karne ki zaroorat nahi।
+    </div>
+    <div class="info-text" style="margin-top:18px;">Ab yeh page band kar sakte hain।</div>
+  </div>
+
+  <!-- ══ SCREEN 6: Error / Expired ══ -->
+  <div class="screen" id="screenError">
+    <div class="error-icon">⏰</div>
+    <div class="error-title" id="errorTitle">Session Expired</div>
+    <div class="error-msg" id="errorMsg">Yeh attendance session expire ho gaya hai। Teacher se naya QR maangein।</div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ════════════════════════════════════════════
+//   FIREBASE CONFIG
+// ════════════════════════════════════════════
+const FIREBASE_DB_URL = "https://student-attendance-6d56b-default-rtdb.firebaseio.com";
+
+// ════════════════════════════════════════════
+//   STATE
+// ════════════════════════════════════════════
+let sessionId   = null;
+let sessionData = null;
+let foundStudent = null; // { rn, name, mobile }
+let userLocation = null;
+let timerInterval = null;
+
+// ════════════════════════════════════════════
+//   INIT — URL se params lo
+// ════════════════════════════════════════════
+window.addEventListener('load', async () => {
+  const params = new URLSearchParams(window.location.search);
+  sessionId = params.get('s');
+
+  if (!sessionId) {
+    showError('Invalid Link', 'Yeh link galat hai ya expire ho gaya। Teacher se naya QR maangein।');
+    return;
+  }
+
+  await loadSession();
+});
+
+async function loadSession() {
+  try {
+    const res = await fetch(`${FIREBASE_DB_URL}/sessions/${sessionId}.json`);
+    if (!res.ok) {
+      showError('Server Error ' + res.status, 'Firebase se data nahi mila। Teacher se contact karo।');
+      return;
+    }
+    const data = await res.json();
+
+    if (!data) {
+      showError('Session Nahi Mila', 'Yeh session exist nahi karta ya expire ho gaya। Teacher se naya QR/link maangein।');
+      return;
+    }
+
+    // Expiry check
+    if (Date.now() > data.expires) {
+      showError('Session Expire Ho Gaya ⏰', 'Attendance window band ho gayi। Teacher se naya QR maangein।');
+      return;
+    }
+
+    // Check if students data exists
+    if (!data.students || Object.keys(data.students).length === 0) {
+      showError('Students Nahi Hain', 'Is session mein koi student register nahi hai। Teacher se dobara session start karne ko kaho।');
+      return;
+    }
+
+    sessionData = data;
+
+    // Count students with mobile
+    const totalS = Object.keys(data.students).length;
+    const mobileS = Object.values(data.students).filter(s => (s.mobile||'').toString().replace(/\D/g,'').length >= 4).length;
+
+    let subtitle = `Register ${(data.reg || 0) + 1} · Aaj ki Class · ${mobileS}/${totalS} mobile registered`;
+    document.getElementById('sessionInfo').textContent = subtitle;
+
+    // Start countdown display
+    startCountdown(data.expires);
+
+    // Show mobile input screen
+    showScreen('screenMobile');
+    setupOtpInputs();
+
+  } catch(e) {
+    showError('Network Error', 'Internet check karein: ' + e.message);
+  }
+}
+
+// ════════════════════════════════════════════
+//   OTP INPUTS — auto-focus & auto-jump
+// ════════════════════════════════════════════
+function setupOtpInputs() {
+  const ids = ['d1','d2','d3','d4'];
+  ids.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.addEventListener('input', () => {
+      el.value = el.value.replace(/[^0-9]/g,'').slice(-1);
+      if (el.value && i < 3) document.getElementById(ids[i+1]).focus();
+      checkOtpFilled();
+    });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !el.value && i > 0) {
+        document.getElementById(ids[i-1]).focus();
+      }
+    });
+    el.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'');
+      ids.forEach((pid, pi) => {
+        document.getElementById(pid).value = pasted[pi] || '';
+      });
+      checkOtpFilled();
+      document.getElementById(ids[Math.min(pasted.length, 3)]).focus();
+    });
+  });
+}
+
+function checkOtpFilled() {
+  const val = getOtpValue();
+  document.getElementById('btnVerify').disabled = val.length < 4;
+}
+
+function getOtpValue() {
+  return ['d1','d2','d3','d4'].map(id => document.getElementById(id).value).join('');
+}
+
+// ════════════════════════════════════════════
+//   STEP 1: Verify Mobile Last 4 Digits
+// ════════════════════════════════════════════
+function verifyMobile() {
+  const entered = getOtpValue();
+  if (entered.length < 4) { showToast('4 digit daalo!'); return; }
+
+  if (!sessionData || !sessionData.students) {
+    showToast('Session data nahi mila!');
+    return;
+  }
+
+  // Search matching student
+  let matched = null;
+  const students = sessionData.students;
+
+  // Debug: check how many students have mobile numbers
+  let totalStudents = 0, studentsWithMobile = 0;
+  for (const [rn, student] of Object.entries(students)) {
+    if (student.name) totalStudents++;
+    const mob = (student.mobile || '').toString().replace(/\D/g,'');
+    if (mob.length >= 4) studentsWithMobile++;
+  }
+
+  for (const [rn, student] of Object.entries(students)) {
+    const mobile = (student.mobile || '').toString().replace(/\D/g,'');
+    if (mobile.length >= 4 && mobile.slice(-4) === entered) {
+      matched = { rn: parseInt(rn), name: student.name, mobile: student.mobile };
+      break;
+    }
+  }
+
+  if (!matched) {
+    // Show helpful message if no students have mobile numbers at all
+    if (studentsWithMobile === 0) {
+      showToast('⚠️ Register mein mobile numbers nahi hain! Teacher se kaho.');
+    } else {
+      showToast(`❌ Number nahi mila! (${studentsWithMobile}/${totalStudents} students ke mobile registered hain)`);
+    }
+    // Shake effect
+    ['d1','d2','d3','d4'].forEach(id => {
+      const el = document.getElementById(id);
+      el.style.borderColor = '#ff6b6b';
+      setTimeout(() => { el.style.borderColor = ''; }, 1200);
+    });
+    return;
+  }
+
+  // Check already marked
+  const responses = sessionData.responses || {};
+  if (responses[matched.rn] && responses[matched.rn].location) {
+    showScreen('screenAlready');
+    return;
+  }
+
+  foundStudent = matched;
+
+  // Show confirm screen
+  document.getElementById('foundName').textContent = matched.name;
+  document.getElementById('foundRn').textContent   = `Mobile: ****${entered}`;
+
+  showScreen('screenConfirm');
+}
+
+// ════════════════════════════════════════════
+//   STEP 2: Get GPS Location
+// ════════════════════════════════════════════
+function getLocation() {
+  const btn    = document.getElementById('btnGetLoc');
+  const locBox = document.getElementById('locBox');
+  const locMsg = document.getElementById('locMsg');
+
+  if (!navigator.geolocation) {
+    locBox.className = 'loc-box error';
+    locMsg.textContent = 'Aapka browser location support nahi karta।';
+    return;
+  }
+
+  btn.disabled    = true;
+  btn.textContent = '⏳ Location mil rahi hai...';
+  locBox.className = 'loc-box waiting';
+  locMsg.innerHTML = '<span class="spinner"></span> GPS se location le raha hai...';
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      userLocation = {
+        lat: pos.coords.latitude,
+        lng: pos.coords.longitude,
+        acc: Math.round(pos.coords.accuracy)
+      };
+      locBox.className = 'loc-box success';
+      locMsg.textContent = `✅ Location mili! (Accuracy: ±${userLocation.acc}m)`;
+      btn.textContent = '📍 Location Mil Gayi ✓';
+      btn.style.background = 'rgba(56,217,169,0.15)';
+      btn.style.color = '#38d9a9';
+      btn.style.border = '1px solid rgba(56,217,169,0.3)';
+
+      document.getElementById('btnSubmit').disabled = false;
+      showToast('✅ Location successfully mili!');
+    },
+    (err) => {
+      btn.disabled = false;
+      btn.textContent = '📍 Dobara Try Karo';
+      locBox.className = 'loc-box error';
+
+      let msg = 'Location nahi mili। ';
+      if (err.code === 1) msg += 'Permission deny kiya — browser settings mein allow karo।';
+      else if (err.code === 2) msg += 'GPS signal nahi hai। Bahar jao ya Wi-Fi on karo।';
+      else msg += 'Timeout. Dobara try karo।';
+
+      locMsg.textContent = msg;
+      showToast('❌ Location allow karna zaroori hai!');
+    },
+    { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+  );
+}
+
+// ════════════════════════════════════════════
+//   STEP 3: Submit Attendance to Firebase
+// ════════════════════════════════════════════
+async function submitAttendance() {
+  if (!userLocation) {
+    showToast('❌ Pehle location allow karo!');
+    return;
+  }
+  if (!foundStudent) {
+    showToast('❌ Student verify nahi hua!');
+    return;
+  }
+
+  // Expiry re-check
+  if (Date.now() > sessionData.expires) {
+    showError('Session Expire Ho Gaya ⏰', 'Attendance window band ho gayi। Teacher se naya QR maangein।');
+    return;
+  }
+
+  const btn = document.getElementById('btnSubmit');
+  btn.disabled    = true;
+  btn.textContent = '⏳ Submit ho raha hai...';
+
+  const payload = {
+    name:      foundStudent.name,
+    markedAt:  Date.now(),
+    location: {
+      lat: userLocation.lat,
+      lng:  userLocation.lng,
+      acc:  userLocation.acc
+    }
+  };
+
+  try {
+    const res = await fetch(
+      `${FIREBASE_DB_URL}/sessions/${sessionId}/responses/${foundStudent.rn}.json`,
+      { method: 'PUT', body: JSON.stringify(payload) }
+    );
+
+    if (!res.ok) throw new Error('Firebase write failed');
+
+    // Success!
+    clearInterval(timerInterval);
+    document.getElementById('successName').textContent   = foundStudent.name;
+    document.getElementById('successDetail').textContent = `Aaj ki attendance ✅`;
+    showScreen('screenSuccess');
+
+  } catch(e) {
+    btn.disabled    = false;
+    btn.textContent = '✅ Attendance Mark Karo';
+    showToast('❌ Submit nahi hua! Internet check karo aur dobara try karo।');
+  }
+}
+
+// ════════════════════════════════════════════
+//   HELPERS
+// ════════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showError(title, msg) {
+  document.getElementById('errorTitle').textContent = title;
+  document.getElementById('errorMsg').textContent   = msg;
+  showScreen('screenError');
+}
+
+function goBack() {
+  userLocation = null;
+  foundStudent = null;
+  ['d1','d2','d3','d4'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('btnVerify').disabled = true;
+  document.getElementById('btnSubmit').disabled = true;
+  document.getElementById('locBox').className = 'loc-box waiting';
+  document.getElementById('locMsg').textContent = 'Location button dabao aur Allow karo';
+  document.getElementById('btnGetLoc').disabled = false;
+  document.getElementById('btnGetLoc').textContent = '📍 Location Allow Karo';
+  document.getElementById('btnGetLoc').style = '';
+  showScreen('screenMobile');
+  setTimeout(() => document.getElementById('d1').focus(), 100);
+}
+
+function startCountdown(expires) {
+  const el = document.getElementById('timerDisplay');
+  function update() {
+    const rem = expires - Date.now();
+    if (rem <= 0) {
+      el.innerHTML = '⏱ <span class="timer-val">Expired!</span>';
+      clearInterval(timerInterval);
+      showError('Session Expire Ho Gaya ⏰', 'Attendance window band ho gayi। Teacher se naya QR maangein।');
+      return;
+    }
+    const m = Math.floor(rem / 60000);
+    const s = Math.floor((rem % 60000) / 1000);
+    el.innerHTML = `⏱ Session band hone mein: <span class="timer-val">${m}:${s.toString().padStart(2,'0')}</span>`;
+  }
+  update();
+  timerInterval = setInterval(update, 1000);
+}
+
+let _toastTimer = null;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
